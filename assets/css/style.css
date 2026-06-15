@@ -1,4 +1,4 @@
-﻿:root {
+:root {
   --font-urdu: "Jameel Noori Nastaleeq", "Noto Nastaliq Urdu", serif;
   --font-arabic: "Sakkal Majalla", "Amiri", "Scheherazade New", serif;
   --font-ui: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -176,7 +176,17 @@ button, input, select { font: inherit; }
 .question-card, .qa-card { padding: 16px; }
 .question-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 .option-list { margin: 8px 0 10px; padding-inline-start: 24px; }
+.option-list li { border: 1px solid transparent; border-radius: 7px; padding: 4px 9px; transition: background .18s ease, border-color .18s ease, color .18s ease, transform .18s ease; }
+.option-list li.interactive-option { cursor: pointer; }
+.option-list li.interactive-option:hover, .option-list li.interactive-option:focus-visible { background: rgba(197,155,59,.16); border-color: rgba(197,155,59,.5); color: var(--navy); transform: translateX(-2px); }
+.option-list li.is-correct { background: rgba(13,115,88,.14); border-color: var(--emerald); color: var(--emerald); font-weight: 700; }
+.option-list li.is-correct::after { content: " ⭐"; color: var(--gold); font-family: var(--font-ui); }
+.option-list li.is-wrong { background: rgba(186,48,48,.12); border-color: #ba3030; color: #9d2525; font-weight: 700; }
+.option-feedback { min-height: 1.7em; margin: 6px 0 8px; font-weight: 700; }
+.option-feedback.is-success { color: var(--emerald); }
+.option-feedback.is-error { color: #ba3030; }
 .answer-panel { margin: 12px 0 0; border-inline-start: 4px solid var(--emerald); background: rgba(13,115,88,.08); padding: 10px 12px; border-radius: 6px; }
+.question-card .answer-toggle, .quiz-card .answer-toggle { display: none; }
 .one-line-list { display: grid; gap: 8px; padding-inline-start: 24px; }
 .quiz-widget { border: 1px solid var(--line); border-radius: 8px; padding: 16px; background: linear-gradient(180deg, rgba(16,41,75,.05), rgba(197,155,59,.07)); }
 .quiz-progress, .quiz-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
