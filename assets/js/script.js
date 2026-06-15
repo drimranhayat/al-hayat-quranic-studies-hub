@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
   'use strict';
   const basePath = window.ALHAYAT_BASE_PATH || '';
   const topics = window.ALHAYAT_TOPICS || [];
@@ -202,6 +202,66 @@
     button.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
   }
   function setupAnswersAndQuizzes() {
+    function normalizeAnswer(value) {
+      return String(value || '').replace(/\s+/g, ' ').replace(/[۔.]+$/g, '').trim();
+    }
+    function correctAnswerFor(card) {
+      const panel = card.querySelector('.answer-panel');
+      if (!panel) return '';
+      const strong = panel.querySelector('strong');
+      if (strong && strong.nextSibling) return normalizeAnswer(strong.nextSibling.textContent);
+      const htmlMatch = panel.innerHTML.match(/درست جواب:<\/strong>\s*([^<]+)/);
+      if (htmlMatch) return normalizeAnswer(htmlMatch[1]);
+      const text = normalizeAnswer(panel.textContent);
+      const match = text.match(/درست جواب:\s*([^۔\n\r<]+)/);
+      return normalizeAnswer(match ? match[1] : text);
+    }
+    function ensureOptionMessage(card) {
+      let message = card.querySelector('.option-feedback');
+      if (!message) {
+        message = document.createElement('p');
+        message.className = 'option-feedback';
+        message.setAttribute('aria-live', 'polite');
+        const list = card.querySelector('.option-list');
+        if (list) list.insertAdjacentElement('afterend', message);
+      }
+      return message;
+    }
+    function activateOption(option) {
+      const card = option.closest('.question-card, .quiz-card');
+      if (!card) return;
+      const correct = correctAnswerFor(card);
+      const selected = normalizeAnswer(option.textContent);
+      const message = ensureOptionMessage(card);
+      card.querySelectorAll('.option-list li').forEach(item => item.classList.remove('is-correct', 'is-wrong'));
+      if (selected === correct) {
+        option.classList.add('is-correct');
+        message.className = 'option-feedback is-success';
+        message.textContent = '⭐ درست جواب';
+        const panel = card.querySelector('.answer-panel');
+        if (panel) panel.removeAttribute('hidden');
+      } else {
+        option.classList.add('is-wrong');
+        message.className = 'option-feedback is-error';
+        message.textContent = 'دوبارہ کوشش کریں۔';
+      }
+    }
+    document.querySelectorAll('.question-card .option-list li, .quiz-card .option-list li').forEach(option => {
+      option.setAttribute('role', 'button');
+      option.setAttribute('tabindex', '0');
+      option.classList.add('interactive-option');
+    });
+    document.addEventListener('click', event => {
+      const option = event.target.closest('.question-card .option-list li, .quiz-card .option-list li');
+      if (option) activateOption(option);
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      const option = event.target.closest('.question-card .option-list li, .quiz-card .option-list li');
+      if (!option) return;
+      event.preventDefault();
+      activateOption(option);
+    });
     document.addEventListener('click', event => {
       const answerButton = event.target.closest('.answer-toggle');
       if (!answerButton) return;
@@ -221,6 +281,11 @@
       if (total) total.textContent = String(cards.length);
       function show() {
         cards.forEach((card, i) => card.classList.toggle('is-active', i === index));
+        cards.forEach(card => {
+          card.querySelectorAll('.option-list li').forEach(item => item.classList.remove('is-correct', 'is-wrong'));
+          const message = card.querySelector('.option-feedback');
+          if (message) message.textContent = '';
+        });
         if (current) current.textContent = String(index + 1);
       }
       if (next) next.addEventListener('click', () => { index = (index + 1) % cards.length; show(); });
