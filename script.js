@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
   'use strict';
   const basePath = window.ALHAYAT_BASE_PATH || '';
   const topics = window.ALHAYAT_TOPICS || [];
